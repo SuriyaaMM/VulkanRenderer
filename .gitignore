@@ -363,5 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # Binaries and Intermediates
-./Binaries
-./VulkanRenderer/Intermediates
+Binaries/
+VulkanRenderer/Intermediates/
