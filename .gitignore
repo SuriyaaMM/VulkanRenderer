@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Binaries and Intermediates
+./Binaries
+./VulkanRenderer/Intermediates
