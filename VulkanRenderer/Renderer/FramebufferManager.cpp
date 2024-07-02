@@ -35,41 +35,39 @@ namespace Fox
 	namespace vk
 	{
 		FramebufferManager::FramebufferManager(DeviceManager* pDeviceManager, 
-			SwapchainManager* pSwapchainManager, PipelineManager* pPipelineManager, 
-			ImageManager* pImageManager)
+			SwapchainManager* pSwapchainManager, PipelineManager* pPipelineManager)
 			:m_Framebuffers()
 		{
-			for (std::size_t i = 0; i < pImageManager->GetImageViewsV().size(); ++i)
+			for (std::size_t i = 0; i < pSwapchainManager->GetSwapchainH()->GetImageViewVH().size(); ++i)
 			{
 				VkImageView Attachment[1] =
 				{
-					pImageManager->GetImageViewsV()[i]
+					pSwapchainManager->GetSwapchainH()->GetImageViewVH()[i]
 				};
 
 				m_Framebuffers.emplace_back(std::move(
 					Resource::Framebuffer(pDeviceManager->GetDeviceH(), 
 						pSwapchainManager->GetSwapchainH()->GetExtent(), 
-						pPipelineManager->GetRenderPassH(), Attachment, 1)));
+						pPipelineManager->GetRenderPassH()->GetRenderPassH(), Attachment, 1)));
 			}
 		}
 
 		void FramebufferManager::RecreateFramebuffers(DeviceManager* pDeviceManager, 
-			SwapchainManager* pSwapchainManager, PipelineManager* pPipelineManager, 
-			ImageManager* pImageManager) noexcept
+			SwapchainManager* pSwapchainManager, PipelineManager* pPipelineManager) noexcept
 		{
 			DestroyResources();
 
-			for (std::size_t i = 0; i < pImageManager->GetImageViewsV().size(); ++i)
+			for (std::size_t i = 0; i < pSwapchainManager->GetSwapchainH()->GetImageViewVH().size(); ++i)
 			{
 				VkImageView Attachment[1] =
 				{
-					pImageManager->GetImageViewsV()[i]
+					pSwapchainManager->GetSwapchainH()->GetImageViewVH()[i]
 				};
 
 				m_Framebuffers.emplace_back(std::move(
-					Resource::Framebuffer(pDeviceManager->GetDeviceH(), 
+					Resource::Framebuffer(pDeviceManager->GetDeviceH(),
 						pSwapchainManager->GetSwapchainH()->GetExtent(),
-						pPipelineManager->GetRenderPassH(), Attachment, 1)));
+						pPipelineManager->GetRenderPassH()->GetRenderPassH(), Attachment, 1)));
 			}
 		}
 
@@ -79,6 +77,7 @@ namespace Fox
 			{
 				m_Framebuffers[i].DestroyResource();
 			}
+			m_Framebuffers.clear();
 		}
 	}
 }

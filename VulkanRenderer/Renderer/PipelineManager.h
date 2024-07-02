@@ -1,12 +1,33 @@
 
 #pragma once
 
-#include "Shaders.h"
+#include "ShaderManager.h"
 #include "SwapchainManager.h"
 #include "PipelineStateConfigurators.h"
 
 namespace Fox
 {
+	namespace Resource
+	{
+		class RenderPass : public CResource
+		{
+		public:
+			RenderPass(const RenderPass& Other) = default;
+			RenderPass(RenderPass&& Other) = default;
+			RenderPass& operator=(const RenderPass& Other) = default;
+
+			RenderPass(VkDevice* pValidDevice, VkSurfaceFormatKHR& Format);
+			~RenderPass() = default;
+
+			void DestroyResource() noexcept;
+			
+			VkRenderPass* GetRenderPassH() noexcept { return &m_RenderPass; }
+
+		private:
+			VkRenderPass m_RenderPass;
+		};
+	}
+
 	namespace vk
 	{
 		class PipelineManager : public DLManager
@@ -18,35 +39,37 @@ namespace Fox
 			PipelineManager(DeviceManager* pDeviceManager, VkSurfaceFormatKHR& SurfaceFormat);
 			~PipelineManager() = default;
 
-			void SetViewportAndScissor(VkExtent2D& Extent) noexcept;
+			void ReconstructGraphicsPipeline(VkSurfaceFormatKHR& SurfaceFormat);
 
 			virtual void DestroyResources() noexcept override;
 
-			VkRenderPass*			GetRenderPassH()		noexcept { return &m_RenderPass; }
 			VkPipelineLayout&		GetPipelineLayout()		noexcept { return m_PipelineLayout; }
-			VkPipeline*				GetPipelineH()			noexcept { return &m_GraphicsPipeline; }
-			VkViewport&				GetViewport()			noexcept { return m_Viewport; }
-			VkRect2D&				GetScissor()			noexcept { return m_Scissors; }
+			VkPipeline*				GetGraphicsPipelineH()	noexcept { return &m_GraphicsPipeline; }
+
 			//VkDescriptorSetLayout&	GetUniformDescriptor()	noexcept { return m_UniformLayout; }
 
 			ShaderManager& GetShaderManager()		noexcept { return m_ShaderManager; }
+			Resource::RenderPass* GetRenderPassH()	noexcept { return &m_RenderPass; }
 
-			std::vector<VkDynamicState>& GetDynamicStatesV() noexcept { return m_DynamicStates; }
+			Config::ViewportConfig& GetViewportConfig() noexcept { return m_VPConfig; }
 
 		private:
 			Config::VertexInputConfig			m_VIConfig;
 			Config::InputAssemblyConfig			m_IAConfig;
+			Config::DynamicStatesConfig			m_DynamicStatesConfig;
+			Config::RasterizerConfig			m_RasterizerStateConfig;
+			Config::MultisampleConfig			m_MSConfig;
+			Config::ColourBlendConfig			m_CBConfig;
+			Config::ViewportConfig				m_VPConfig;
 
 			ShaderManager						m_ShaderManager;
+			Resource::RenderPass				m_RenderPass;
 
-			std::vector<VkDynamicState>			m_DynamicStates;
+			std::array<VkPipelineShaderStageCreateInfo, 2> m_ShaderStages;
 
 			//VkDescriptorSetLayout				m_UniformLayout;
 			VkPipelineLayout					m_PipelineLayout;
-			VkRenderPass						m_RenderPass;
 			VkPipeline							m_GraphicsPipeline;
-			VkViewport							m_Viewport;
-			VkRect2D							m_Scissors;
 		};
 	}
 }

@@ -26,8 +26,8 @@ namespace Fox
 
 			virtual void DestroyResources() noexcept override;
 
-			VkInstance* GetInstanceH() noexcept { return &m_Instance; }
-			VkDebugUtilsMessengerEXT& GetDebugMessenger() noexcept { return m_DebugMessenger; }
+			VkInstance*					GetInstanceH()		noexcept { return &m_Instance; }
+			VkDebugUtilsMessengerEXT&	GetDebugMessenger() noexcept { return m_DebugMessenger; }
 
 		private:
 			std::vector<const char*>* m_RInstanceExtensions;

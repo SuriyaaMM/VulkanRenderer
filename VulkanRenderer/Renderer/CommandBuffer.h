@@ -1,8 +1,7 @@
 
 #pragma once
 
-#include "PipelineManager.h"
-#include "FramebufferManager.h"
+#include "Core.h"
 
 namespace Fox
 {
@@ -63,38 +62,7 @@ namespace Fox
 		POOL_FAMILY_TRANSFER
 	};
 
-	namespace vk
-	{
-		class CommandBufferManager : public Manager
-		{
-		public:
-			CommandBufferManager(const CommandBufferManager& Other) = delete;
-			CommandBufferManager(CommandBufferManager&& Other) = delete;
-
-			CommandBufferManager(DeviceManager* pDeviceManager);
-			~CommandBufferManager() = default;
-
-			_NODISCARD Resource::CommandBuffer* CreateCommandBuffer(VkDevice* pValidDevice, 
-				POOL_FAMILY PoolFamily, uint32_t&& Count) noexcept;
-
-			Resource::CommandBuffer* GetCommandBufferHAt(uint32_t Index)
-			{
-				return &m_CommandBuffers.at(Index);
-			}
-			Resource::CommandBuffer* GetCoreTransferCommandBufferH() noexcept
-			{
-				return &m_CommandBuffers[MAX_ASYNC_FRAMES];
-			}
-
-			virtual void DestroyResources() noexcept override;
-
-		private:
-			Resource::CommandPool m_GraphicsPool;
-			Resource::CommandPool m_TransferPool;
-
-			std::vector<Resource::CommandBuffer> m_CommandBuffers;
-		};
-	}
+	
 
 }
 

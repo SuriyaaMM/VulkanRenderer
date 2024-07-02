@@ -84,6 +84,11 @@ namespace Fox
 			}
 		}
 
+		void QueueManager::DestroyResources() noexcept
+		{
+
+		}
+
 		void QueueManager::SetQueueFamilyPriority(QUEUE_FAMILY QueueFamily,
 			float Priority) noexcept
 		{

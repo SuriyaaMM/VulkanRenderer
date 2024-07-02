@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MemoryManager.h"
-#include "CommandBufferManager.h"
+#include "CommandBuffer.h"
 
 namespace Fox
 {

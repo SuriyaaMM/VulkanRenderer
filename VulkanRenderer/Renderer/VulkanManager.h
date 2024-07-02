@@ -3,9 +3,7 @@
 
 #include "InstanceManager.h"
 #include "FramebufferManager.h"
-#include "CommandBufferManager.h"
-#include "SyncManager.h"
-#include "ResourceManager.h"
+#include "CommandPoolManager.h"
 #include "Mesh.h"
 #include "Frame.h"
 
@@ -47,22 +45,21 @@ namespace Fox
 			WindowManager			m_WindowManager;
 			DeviceManager			m_DeviceManager;
 			MemoryManager			m_MemoryManager;
-			
-			std::vector<Resource::Frame> m_Frames;
-
 			SwapchainManager		m_SwapchainManager;
 			PipelineManager			m_PipelineManager;
-			std::unique_ptr<ImageManager>				m_pImageManager;
-			std::unique_ptr<FramebufferManager>			m_pFramebufferManager;
-			CommandBufferManager	m_CommandBufferManager;
-			SyncManager				m_SyncManager;
-			ResourceManager			m_ResourceManager;
+			FramebufferManager		m_FramebufferManager;
+			CommandPoolManager		m_CommandPoolManager;
 
+			std::vector<Resource::Frame>			m_Frames;
+
+			Resource::CommandBuffer m_TransferCommandBuffer;
 			Resource::TriangleMesh	m_TriangleMesh;
-
+		
+			/*
 			VkDescriptorPool					m_DescriptorPool;
 			std::vector<VkDescriptorSetLayout>	m_UniformLayouts;
 			std::vector<VkDescriptorSet>		m_UniformDescriptors;
+			*/
 		};
 	}
 }

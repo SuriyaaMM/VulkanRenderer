@@ -11,11 +11,9 @@ namespace Fox
 			glfwPollEvents();
 
 			if (m_VulkanManager.GetWindowManager().HasFramebufferBeenResized())
-			{
 				m_VulkanManager.RecreateFramebuffers();
-			}
-
-			m_VulkanManager.DrawFrame();
+			else
+				m_VulkanManager.DrawFrame();
 		}
 
 		vkDeviceWaitIdle(*m_VulkanManager.GetDeviceHManager().GetDeviceH());

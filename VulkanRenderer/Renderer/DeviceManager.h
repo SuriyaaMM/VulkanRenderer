@@ -14,7 +14,7 @@ namespace Fox
 	*/
 	namespace vk
 	{
-		class DeviceManager : public PhysicalDeviceManager, public QueueManager, public Manager
+		class DeviceManager : public PhysicalDeviceManager, public QueueManager
 		{
 		public:
 			DeviceManager(const DeviceManager& Source) = delete;
@@ -25,15 +25,15 @@ namespace Fox
 				std::vector<const char*>* RequiredLayers);
 			~DeviceManager() = default;
 
-			virtual void DestroyResources() noexcept;
+			virtual void DestroyResources() noexcept override ;
 
 			VkDevice* GetDeviceH() noexcept { return &m_Device; }
 
 		private:
-			std::vector<const char*>* m_RDeviceExtensions;
-			std::vector<const char*>* m_RDeviceLayers;
-			std::vector<VkExtensionProperties> m_ADeviceExtensionProperties;
-			std::vector<VkLayerProperties> m_ADeviceLayerProperties;
+			std::vector<const char*>*			m_RDeviceExtensions;
+			std::vector<const char*>*			m_RDeviceLayers;
+			std::vector<VkExtensionProperties>	m_ADeviceExtensionProperties;
+			std::vector<VkLayerProperties>		m_ADeviceLayerProperties;
 
 			VkDevice m_Device;
 		};

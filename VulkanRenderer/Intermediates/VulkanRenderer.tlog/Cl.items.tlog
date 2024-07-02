@@ -1,4 +1,5 @@
 A:\Repos\VulkanRenderer\VulkanRenderer\Application.cpp;A:\Repos\VulkanRenderer\VulkanRenderer\Intermediates\Application.obj
+A:\Repos\VulkanRenderer\VulkanRenderer\Renderer\CommandPoolManager.cpp;A:\Repos\VulkanRenderer\VulkanRenderer\Intermediates\CommandPoolManager.obj
 A:\Repos\VulkanRenderer\VulkanRenderer\Renderer\Frame.cpp;A:\Repos\VulkanRenderer\VulkanRenderer\Intermediates\Frame.obj
 A:\Repos\VulkanRenderer\VulkanRenderer\Main.cpp;A:\Repos\VulkanRenderer\VulkanRenderer\Intermediates\Main.obj
 A:\Repos\VulkanRenderer\VulkanRenderer\Renderer\Buffer.cpp;A:\Repos\VulkanRenderer\VulkanRenderer\Intermediates\Buffer.obj
@@ -13,10 +14,9 @@ A:\Repos\VulkanRenderer\VulkanRenderer\Renderer\QueueManager.cpp;A:\Repos\Vulkan
 A:\Repos\VulkanRenderer\VulkanRenderer\Renderer\PhysicalDeviceManager.cpp;A:\Repos\VulkanRenderer\VulkanRenderer\Intermediates\PhysicalDeviceManager.obj
 A:\Repos\VulkanRenderer\VulkanRenderer\Renderer\VulkanManager.cpp;A:\Repos\VulkanRenderer\VulkanRenderer\Intermediates\VulkanManager.obj
 A:\Repos\VulkanRenderer\VulkanRenderer\Renderer\SwapchainManager.cpp;A:\Repos\VulkanRenderer\VulkanRenderer\Intermediates\SwapchainManager.obj
-A:\Repos\VulkanRenderer\VulkanRenderer\Renderer\ImageManager.cpp;A:\Repos\VulkanRenderer\VulkanRenderer\Intermediates\ImageManager.obj
 A:\Repos\VulkanRenderer\VulkanRenderer\Renderer\PipelineManager.cpp;A:\Repos\VulkanRenderer\VulkanRenderer\Intermediates\PipelineManager.obj
 A:\Repos\VulkanRenderer\VulkanRenderer\Renderer\Shaders.cpp;A:\Repos\VulkanRenderer\VulkanRenderer\Intermediates\Shaders.obj
 A:\Repos\VulkanRenderer\VulkanRenderer\Renderer\FramebufferManager.cpp;A:\Repos\VulkanRenderer\VulkanRenderer\Intermediates\FramebufferManager.obj
-A:\Repos\VulkanRenderer\VulkanRenderer\Renderer\CommandBufferManager.cpp;A:\Repos\VulkanRenderer\VulkanRenderer\Intermediates\CommandBufferManager.obj
-A:\Repos\VulkanRenderer\VulkanRenderer\Renderer\SyncManager.cpp;A:\Repos\VulkanRenderer\VulkanRenderer\Intermediates\SyncManager.obj
-A:\Repos\VulkanRenderer\VulkanRenderer\Renderer\ResourceManager.cpp;A:\Repos\VulkanRenderer\VulkanRenderer\Intermediates\ResourceManager.obj
+A:\Repos\VulkanRenderer\VulkanRenderer\Renderer\CommandBuffer.cpp;A:\Repos\VulkanRenderer\VulkanRenderer\Intermediates\CommandBuffer.obj
+A:\Repos\VulkanRenderer\VulkanRenderer\Renderer\SyncResources.cpp;A:\Repos\VulkanRenderer\VulkanRenderer\Intermediates\SyncResources.obj
+A:\Repos\VulkanRenderer\VulkanRenderer\Renderer\ShaderManager.cpp;A:\Repos\VulkanRenderer\VulkanRenderer\Intermediates\ShaderManager.obj

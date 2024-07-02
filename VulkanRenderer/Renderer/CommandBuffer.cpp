@@ -1,4 +1,4 @@
-#include "CommandBufferManager.h"
+#include "CommandBuffer.h"
 
 namespace Fox
 {
@@ -71,59 +71,6 @@ namespace Fox
 		}
 	}
 
-	namespace vk
-	{
-		CommandBufferManager::CommandBufferManager(DeviceManager* pDeviceManager)
-			:
-			m_GraphicsPool(pDeviceManager->GetDeviceH(), pDeviceManager->GetQueueFamilyIndex(QUEUE_FAMILY_GRAPHICS)),
-			m_TransferPool(pDeviceManager->GetDeviceH(), pDeviceManager->GetQueueFamilyIndex(QUEUE_FAMILY_TRANSFER)),
-			m_CommandBuffers()
-		{
-			//Section:: Creation of Command Buffers from Graphics Pool
-			//Creates MAX_ASYNC_FRAMES number of Graphics Pool Compatible Command Buffers
-			for (std::size_t i = 0; i < MAX_ASYNC_FRAMES; ++i)
-			{
-				m_CommandBuffers.emplace_back(std::move(
-					Resource::CommandBuffer(pDeviceManager->GetDeviceH(), &m_GraphicsPool, 1)));
-			}
-
-			//Section:: Creation of Command Buffer from Transfer Pool
-			m_CommandBuffers.emplace_back(std::move(
-				Resource::CommandBuffer(pDeviceManager->GetDeviceH(), &m_TransferPool, 1)));
-		}
-
-		_NODISCARD Resource::CommandBuffer* CommandBufferManager::CreateCommandBuffer(
-			VkDevice* pValidDevice, POOL_FAMILY PoolFamily, uint32_t&& Count) noexcept
-		{
-			if (PoolFamily == POOL_FAMILY_GRAPHICS)
-			{
-				m_CommandBuffers.emplace_back(std::move(
-					Resource::CommandBuffer(pValidDevice, &m_GraphicsPool, Count)));
-				return &m_CommandBuffers.back();
-			}
-			else if (PoolFamily == POOL_FAMILY_TRANSFER)
-			{
-				m_CommandBuffers.emplace_back(std::move(
-					Resource::CommandBuffer(pValidDevice, &m_TransferPool, Count)));
-				return &m_CommandBuffers.back();
-			}
-			else
-			{
-				CHECK(VK_ERROR_OUT_OF_HOST_MEMORY, "Queue Family Unknown");
-				return 0;
-			}
-		}
-
-		void CommandBufferManager::DestroyResources() noexcept
-		{
-			for (std::size_t i = 0; i < m_CommandBuffers.size(); ++i)
-			{
-				m_CommandBuffers[i].DestroyResource();
-			}
-
-			m_TransferPool.DestroyResource();
-			m_GraphicsPool.DestroyResource();
-		}
-	}
+	
 
 }

@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include "ImageManager.h"
 #include "PipelineManager.h"
 
 namespace Fox
@@ -37,11 +36,11 @@ namespace Fox
 			FramebufferManager(FramebufferManager&& Other) = delete;
 
 			FramebufferManager(DeviceManager* pDeviceManager, SwapchainManager* pSwapchainManager,
-				PipelineManager* pPipelineManager, ImageManager* pImageManager);
+				PipelineManager* pPipelineManager);
 			~FramebufferManager() = default;
 
 			void RecreateFramebuffers(DeviceManager* pDeviceManager, SwapchainManager* pSwapchainManager,
-				PipelineManager* pPipelineManager, ImageManager* pImageManager) noexcept;
+				PipelineManager* pPipelineManager) noexcept;
 
 			virtual void DestroyResources() noexcept override;
 

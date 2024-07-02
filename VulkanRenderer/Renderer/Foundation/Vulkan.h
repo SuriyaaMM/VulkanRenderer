@@ -93,6 +93,26 @@ namespace Fox
 		VkDevice* pDevice;
 	};
 
+	//Copyable Resource
+	struct CResource
+	{
+	public:
+		CResource(const CResource& Other) = default;
+		CResource(CResource&& Other) = default;
+		CResource& operator = (const CResource& Other) = default;
+
+		CResource(VkDevice* pValidDevice)
+			:pDevice(pValidDevice)
+		{
+
+		}
+		~CResource() = default;
+
+		virtual void DestroyResource() noexcept = 0;
+	protected:
+		VkDevice* pDevice;
+	};
+
 	/*
 	* Base Manager
 	*/

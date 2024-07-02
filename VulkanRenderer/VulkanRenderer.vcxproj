@@ -164,6 +164,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="Renderer\CommandPoolManager.cpp" />
     <ClCompile Include="Renderer\Frame.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Renderer\Buffer.cpp" />
@@ -178,16 +179,16 @@
     <ClCompile Include="Renderer\PhysicalDeviceManager.cpp" />
     <ClCompile Include="Renderer\VulkanManager.cpp" />
     <ClCompile Include="Renderer\SwapchainManager.cpp" />
-    <ClCompile Include="Renderer\ImageManager.cpp" />
     <ClCompile Include="Renderer\PipelineManager.cpp" />
     <ClCompile Include="Renderer\Shaders.cpp" />
     <ClCompile Include="Renderer\FramebufferManager.cpp" />
-    <ClCompile Include="Renderer\CommandBufferManager.cpp" />
-    <ClCompile Include="Renderer\SyncManager.cpp" />
-    <ClCompile Include="Renderer\ResourceManager.cpp" />
+    <ClCompile Include="Renderer\CommandBuffer.cpp" />
+    <ClCompile Include="Renderer\SyncResources.cpp" />
+    <ClCompile Include="Renderer\ShaderManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
+    <ClInclude Include="Renderer\CommandPoolManager.h" />
     <ClInclude Include="Dependencies\vma\vk_mem_alloc.h" />
     <ClInclude Include="Dependencies\vma\vma.h" />
     <ClInclude Include="Renderer\Frame.h" />
@@ -207,13 +208,12 @@
     <ClInclude Include="Renderer\PhysicalDeviceManager.h" />
     <ClInclude Include="Renderer\VulkanManager.h" />
     <ClInclude Include="Renderer\SwapchainManager.h" />
-    <ClInclude Include="Renderer\ImageManager.h" />
     <ClInclude Include="Renderer\PipelineManager.h" />
     <ClInclude Include="Renderer\Shaders.h" />
     <ClInclude Include="Renderer\FramebufferManager.h" />
-    <ClInclude Include="Renderer\CommandBufferManager.h" />
-    <ClInclude Include="Renderer\SyncManager.h" />
-    <ClInclude Include="Renderer\ResourceManager.h" />
+    <ClInclude Include="Renderer\CommandBuffer.h" />
+    <ClInclude Include="Renderer\SyncResources.h" />
+    <ClInclude Include="Renderer\ShaderManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Renderer\Shaders\CompileShaders.bat" />

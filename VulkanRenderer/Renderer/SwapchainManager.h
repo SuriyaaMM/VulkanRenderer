@@ -8,11 +8,12 @@ namespace Fox
 {
 	namespace Resource
 	{
-		class Swapchain : public MResource
+		class Swapchain : public CResource
 		{
 		public:
-			Swapchain(const Swapchain& Other) = delete;
-			Swapchain(Swapchain&& Other) = delete;
+			Swapchain(const Swapchain& Other) = default;
+			Swapchain(Swapchain&& Other) = default;
+			Swapchain& operator = (const Swapchain& Other) = default;
 
 			Swapchain(vk::DeviceManager* pDeviceManager, vk::WindowManager* pWindowManager);
 			~Swapchain() = default;
@@ -24,6 +25,9 @@ namespace Fox
 			VkSurfaceFormatKHR&	GetSurfaceFormat()	noexcept { return m_SurfaceFormat; }
 			VkExtent2D&			GetExtent()			noexcept { return m_Extent; }
 			VkSwapchainKHR*		GetSwapchainH()		noexcept { return &m_Swapchain; }
+
+			std::vector<VkImage>& GetImageVH() noexcept { return m_Images; }
+			std::vector<VkImageView>& GetImageViewVH() noexcept { return m_ImageViews; }
 
 		private:
 			uint32_t m_ImageCount;
@@ -37,6 +41,9 @@ namespace Fox
 			VkPresentModeKHR							m_PresentMode;
 			VkExtent2D									m_Extent;
 			VkSwapchainKHR								m_Swapchain;
+
+			std::vector<VkImage>				m_Images;
+			std::vector<VkImageView>			m_ImageViews;
 		};
 	}
 
@@ -52,14 +59,14 @@ namespace Fox
 			SwapchainManager(DeviceManager* pDeviceManager, WindowManager* pWindowManager);
 			~SwapchainManager() = default;
 
-			void RecreateSwapchain(DeviceManager* pDeviceManager, WindowManager* pWindowManager);
+			void ReconstructSwapchain(DeviceManager* pDeviceManager, WindowManager* pWindowManager);
 
 			virtual void DestroyResources() noexcept override;
 
-			Resource::Swapchain* GetSwapchainH() noexcept { return m_pSwapchain.get(); }
+			Resource::Swapchain* GetSwapchainH() noexcept { return &m_Swapchain; }
 			
 		private:
-			std::unique_ptr<Resource::Swapchain> m_pSwapchain;
+			Resource::Swapchain m_Swapchain;
 		};
 	}
 }

@@ -6,7 +6,7 @@ namespace Fox
 	{
 		Swapchain::Swapchain(vk::DeviceManager* pDeviceManager, vk::WindowManager* pWindowManager)
 			:
-			MResource(pDeviceManager->GetDeviceH())
+			CResource(pDeviceManager->GetDeviceH())
 		{
 			//Section:: Querying for Swapchain Details
 
@@ -95,9 +95,9 @@ namespace Fox
 
 			uint32_t ImageCount = 0;
 
-			if (!(m_SurfaceCapabilities.maxImageCount < 2))
+			if (!(m_SurfaceCapabilities.maxImageCount < MAX_ASYNC_FRAMES))
 			{
-				ImageCount = 2;
+				ImageCount = MAX_ASYNC_FRAMES;
 			}
 			else
 			{
@@ -114,7 +114,11 @@ namespace Fox
 			m_SwapchainCreateI.imageArrayLayers = 1;
 			m_SwapchainCreateI.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 			m_SwapchainCreateI.minImageCount = ImageCount;
+			m_SwapchainCreateI.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+			m_SwapchainCreateI.queueFamilyIndexCount = 0;
+			m_SwapchainCreateI.pQueueFamilyIndices = nullptr;
 
+			/*
 			if (0)
 			{
 				m_SwapchainCreateI.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
@@ -128,21 +132,60 @@ namespace Fox
 				m_SwapchainCreateI.queueFamilyIndexCount = 0;
 				m_SwapchainCreateI.pQueueFamilyIndices = nullptr;
 			}
+			*/
 
 			m_SwapchainCreateI.imageExtent = m_Extent;
 			m_SwapchainCreateI.preTransform = m_SurfaceCapabilities.currentTransform;
 			m_SwapchainCreateI.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 			m_SwapchainCreateI.clipped = true;
 			m_SwapchainCreateI.oldSwapchain = nullptr;
+			m_SwapchainCreateI.pNext = nullptr;
 
 			Debug::Result = vkCreateSwapchainKHR(*pDevice, &m_SwapchainCreateI, nullptr, &m_Swapchain);
 			CHECK(Debug::Result, "Swapchain Creation Failed!");
+
+			vkGetSwapchainImagesKHR(*pDevice, m_Swapchain, &ImageCount, nullptr);
+
+			m_Images.resize(ImageCount);
+
+			vkGetSwapchainImagesKHR(*pDevice, m_Swapchain, &ImageCount, m_Images.data());
+
+			m_ImageViews.resize(m_Images.size());
+
+			for (std::size_t i = 0; i < m_ImageViews.size(); ++i)
+			{
+				VkImageViewCreateInfo ImageViewInfo = {};
+				ImageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+				ImageViewInfo.image = m_Images[i];
+				ImageViewInfo.format = m_SurfaceFormat.format;
+				ImageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+				ImageViewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+				ImageViewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+				ImageViewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+				ImageViewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+				ImageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+				ImageViewInfo.subresourceRange.baseMipLevel = 0;
+				ImageViewInfo.subresourceRange.levelCount = 1;
+				ImageViewInfo.subresourceRange.baseArrayLayer = 0;
+				ImageViewInfo.subresourceRange.layerCount = 1;
+
+				Debug::Result = vkCreateImageView(*pDevice, &ImageViewInfo, nullptr, &m_ImageViews[i]);
+				CHECK(Debug::Result, "Image View Creation Failed");
+			}
 		}
 
 		void Swapchain::DestroyResource() noexcept
 		{
 			VALIDATE_HANDLE(pDevice);
 			VALIDATE_HANDLE(m_Swapchain);
+
+			for (std::size_t i = 0; i < m_ImageViews.size(); ++i)
+			{
+				VALIDATE_HANDLE(pDevice);
+				VALIDATE_HANDLE(m_ImageViews[i]);
+
+				vkDestroyImageView(*pDevice, m_ImageViews[i], nullptr);
+			}
 
 			vkDestroySwapchainKHR(*pDevice, m_Swapchain, nullptr);
 		}
@@ -153,20 +196,22 @@ namespace Fox
 		SwapchainManager::SwapchainManager(DeviceManager* pDeviceManager,
 			WindowManager* pWindowManager)
 			:
-			Manager()
+			Manager(),
+			m_Swapchain(pDeviceManager, pWindowManager)
 		{
-			m_pSwapchain = std::make_unique<Resource::Swapchain>(pDeviceManager, pWindowManager);
+
 		}
 
-		void SwapchainManager::RecreateSwapchain(DeviceManager* pDeviceManager, 
+		void SwapchainManager::ReconstructSwapchain(DeviceManager* pDeviceManager, 
 			WindowManager* pWindowManager)
 		{
-			m_pSwapchain = std::make_unique<Resource::Swapchain>(pDeviceManager, pWindowManager);
+			m_Swapchain.DestroyResource();
+			m_Swapchain = Resource::Swapchain(pDeviceManager, pWindowManager);
 		}
 
 		void SwapchainManager::DestroyResources() noexcept
 		{
-			m_pSwapchain->DestroyResource();
+			m_Swapchain.DestroyResource();
 		}
 	}
 }

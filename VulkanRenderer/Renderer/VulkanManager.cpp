@@ -11,35 +11,33 @@ namespace Fox
 			m_RDeviceExtensions(0), m_RDeviceLayers(0),
 
 			m_InstanceManager(&m_RInstanceExtensions, &m_RInstanceLayers),
-			m_WindowManager(600, 400, "Vulkan Renderer", m_InstanceManager.GetInstanceH()),
+			m_WindowManager("Vulkan Renderer", m_InstanceManager.GetInstanceH()),
 			m_DeviceManager(*m_InstanceManager.GetInstanceH(), m_WindowManager.GetSurfaceH(),
 				&m_RDeviceExtensions, &m_RDeviceLayers),
 			m_MemoryManager(&m_InstanceManager, &m_DeviceManager),
-
 			m_Frames(),
-			
 			m_SwapchainManager(&m_DeviceManager, &m_WindowManager),
 			m_PipelineManager(&m_DeviceManager, m_SwapchainManager.GetSwapchainH()->GetSurfaceFormat()),
-			m_CommandBufferManager(&m_DeviceManager),
-			m_SyncManager(&m_DeviceManager),
-			m_ResourceManager(&m_DeviceManager, &m_MemoryManager),
+			m_FramebufferManager(&m_DeviceManager, &m_SwapchainManager, &m_PipelineManager),
+			m_CommandPoolManager(&m_DeviceManager),
+
+			m_TransferCommandBuffer(m_DeviceManager.GetDeviceH(), m_CommandPoolManager.GetTransferPoolH(),
+				1),
 			/*
 			m_UniformLayouts(MAX_ASYNC_FRAMES, m_PipelineManager.GetUniformDescriptor()),
 			m_UniformDescriptors(MAX_ASYNC_FRAMES),
 			*/
 			m_TriangleMesh(m_DeviceManager.GetDeviceH(), m_MemoryManager.GetAllocatorH(), 
-				m_CommandBufferManager.GetCoreTransferCommandBufferH(),
-				&m_DeviceManager.GetQueue(QUEUE_FAMILY_TRANSFER))
-		{
-			m_pImageManager = std::make_unique<ImageManager>(&m_DeviceManager, &m_SwapchainManager);
-			m_pFramebufferManager = std::make_unique<FramebufferManager>(&m_DeviceManager,
-				&m_SwapchainManager, &m_PipelineManager, m_pImageManager.get());
+				&m_TransferCommandBuffer,
+				m_DeviceManager.GetQueueH(QUEUE_FAMILY_TRANSFER))
 
-			m_PipelineManager.SetViewportAndScissor(m_SwapchainManager.GetSwapchainH()->GetExtent());
+		{
+			m_PipelineManager.GetViewportConfig().SetViewportAndScissors(
+				m_SwapchainManager.GetSwapchainH()->GetExtent());
 
 			for (std::size_t i = 0; i < MAX_ASYNC_FRAMES; ++i)
 			{
-				m_Frames.emplace_back(&m_DeviceManager, &m_WindowManager);
+				m_Frames.emplace_back(&m_DeviceManager, &m_WindowManager, &m_CommandPoolManager);
 			}
 
 			/*
@@ -92,27 +90,14 @@ namespace Fox
 				vkUpdateDescriptorSets(*m_DeviceManager.GetDeviceH(), 1, &DescriptorWrite, 0, nullptr);
 			}
 			*/
-
-			Utility::BeginRecording(m_CommandBufferManager.GetCommandBufferHAt(m_BackbufferIndex));
-
-			RecordDrawCommand(
-				m_pFramebufferManager->GetFramebufferVH().at(m_BackbufferIndex).GetFramebufferH(),
-				m_CommandBufferManager.GetCommandBufferHAt(m_BackbufferIndex));
-
-			Utility::EndRecording(m_CommandBufferManager.GetCommandBufferHAt(m_BackbufferIndex));
 		}
 
 		VulkanManager::~VulkanManager()
 		{
-			vkDestroyDescriptorPool(*m_DeviceManager.GetDeviceH(), m_DescriptorPool, nullptr);
-			
 			m_TriangleMesh.DestroyResources();
-			m_ResourceManager.DestroyResources();
-			m_SyncManager.DestroyResources();
-			m_CommandBufferManager.DestroyResources();
-			m_pFramebufferManager->DestroyResources();
+			m_CommandPoolManager.DestroyResources();
+			m_FramebufferManager.DestroyResources();
 			m_PipelineManager.DestroyResources();
-			m_pImageManager->DestroyResources();
 			m_SwapchainManager.DestroyResources();
 			for (std::size_t i = 0; i < m_Frames.size(); ++i)
 			{
@@ -126,28 +111,44 @@ namespace Fox
 
 		void VulkanManager::DrawFrame() noexcept
 		{
+			vkWaitForFences(*m_DeviceManager.GetDeviceH(), 1, m_Frames[m_BackbufferIndex].GetFenceH(), 
+				VK_TRUE, UINT64_MAX);
+
+			vkResetFences(*m_DeviceManager.GetDeviceH(), 1, m_Frames[m_BackbufferIndex].GetFenceH());
+
+			uint32_t ImageIndex = 0;
+
+			Debug::Result = vkAcquireNextImageKHR(*m_DeviceManager.GetDeviceH(), 
+				*m_SwapchainManager.GetSwapchainH()->GetSwapchainH(), UINT64_MAX, 
+				m_Frames[m_BackbufferIndex].GetImageAvailableSemaphoreR(),
+				VK_NULL_HANDLE, &ImageIndex);
+			vkResetCommandBuffer(*m_Frames[m_BackbufferIndex].GetCommandBufferH()->GetCommandBufferH(), 0);
+			
+			RecordDrawCommand(m_FramebufferManager.GetFramebufferVH()[m_BackbufferIndex].GetFramebufferH(),
+				m_Frames[m_BackbufferIndex].GetCommandBufferH());
+
 			m_Frames[m_BackbufferIndex].PresentFrame(m_SwapchainManager.GetSwapchainH(),
-				&m_pFramebufferManager->GetFramebufferVH()[m_BackbufferIndex],
-				m_CommandBufferManager.GetCommandBufferHAt(m_BackbufferIndex),
-				&m_DeviceManager.GetQueue(QUEUE_FAMILY_GRAPHICS));
+				m_DeviceManager.GetQueueH(QUEUE_FAMILY_GRAPHICS), ImageIndex);
+
+			m_BackbufferIndex = (++m_BackbufferIndex) % MAX_ASYNC_FRAMES;
 		}
 
 		void VulkanManager::RecreateFramebuffers() noexcept
 		{
 			vkDeviceWaitIdle(*m_DeviceManager.GetDeviceH());
 
-			m_SwapchainManager.RecreateSwapchain(&m_DeviceManager, &m_WindowManager);
+			m_SwapchainManager.ReconstructSwapchain(&m_DeviceManager, &m_WindowManager);
 
-			m_pImageManager->DestroyResources();
+			m_FramebufferManager.RecreateFramebuffers(&m_DeviceManager, &m_SwapchainManager,
+				&m_PipelineManager);
 
-			m_pImageManager = std::make_unique<ImageManager>(&m_DeviceManager, &m_SwapchainManager);
+			m_WindowManager.ResetFramebufferBeenResized();
 
-			m_pFramebufferManager->DestroyResources();
+			m_PipelineManager.ReconstructGraphicsPipeline(
+				m_SwapchainManager.GetSwapchainH()->GetSurfaceFormat()); 
 
-			m_pFramebufferManager = std::make_unique<FramebufferManager>(&m_DeviceManager,
-				&m_SwapchainManager, &m_PipelineManager, m_pImageManager.get());
-
-			m_PipelineManager.SetViewportAndScissor(m_SwapchainManager.GetSwapchainH()->GetExtent());
+			m_PipelineManager.GetViewportConfig().SetViewportAndScissors(
+				m_SwapchainManager.GetSwapchainH()->GetExtent());
 		}
 
 		void VulkanManager::RecordDrawCommand(VkFramebuffer* pFramebuffer,
@@ -155,12 +156,14 @@ namespace Fox
 		{
 			VkClearValue ClearValue = { {{0.3f, 0.2f, 0.4f, 1.0f}} };
 
+			Utility::BeginRecording(pCommandBuffer);
+
 			VkRenderPassBeginInfo RenderPassBeginI = {};
 			RenderPassBeginI.clearValueCount = 1;
 			RenderPassBeginI.framebuffer = *pFramebuffer;
 			RenderPassBeginI.pClearValues = &ClearValue;
 			RenderPassBeginI.pNext = nullptr;
-			RenderPassBeginI.renderPass = *m_PipelineManager.GetRenderPassH();
+			RenderPassBeginI.renderPass = *m_PipelineManager.GetRenderPassH()->GetRenderPassH();
 			RenderPassBeginI.renderArea.offset = { 0,0 };
 			RenderPassBeginI.renderArea.extent = m_SwapchainManager.GetSwapchainH()->GetExtent();
 			RenderPassBeginI.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -169,10 +172,12 @@ namespace Fox
 				VK_SUBPASS_CONTENTS_INLINE);
 
 			vkCmdBindPipeline(*pCommandBuffer->GetCommandBufferH(), VK_PIPELINE_BIND_POINT_GRAPHICS,
-				*m_PipelineManager.GetPipelineH());
+				*m_PipelineManager.GetGraphicsPipelineH());
 
-			vkCmdSetViewport(*pCommandBuffer->GetCommandBufferH(), 0, 1, &m_PipelineManager.GetViewport());
-			vkCmdSetScissor(*pCommandBuffer->GetCommandBufferH(), 0, 1, &m_PipelineManager.GetScissor());
+			vkCmdSetViewport(*pCommandBuffer->GetCommandBufferH(), 0, 1, 
+				m_PipelineManager.GetViewportConfig().GetViewportH());
+			vkCmdSetScissor(*pCommandBuffer->GetCommandBufferH(), 0, 1, 
+				m_PipelineManager.GetViewportConfig().GetScissorsH());
 
 			m_TriangleMesh.Draw(reinterpret_cast<void*>(pCommandBuffer));
 
@@ -183,9 +188,11 @@ namespace Fox
 				*/
 
 			vkCmdEndRenderPass(*pCommandBuffer->GetCommandBufferH());
+
+			Utility::EndRecording(pCommandBuffer);
 		}
 
-		void VulkanManager::UpdateUniform(uint32_t ImageIndex) noexcept
+		void VulkanManager::UpdateUniform(uint32_t m_BackbufferIndex) noexcept
 		{
 			static auto StartTime = std::chrono::high_resolution_clock::now();
 
@@ -208,7 +215,7 @@ namespace Fox
 			UBO.Projection[1][1] *= -1;
 
 			/*
-			memcpy(m_ResourceManager.GetMappedMemoryRegionOfUniforms()[ImageIndex],
+			memcpy(m_ResourceManager.GetMappedMemoryRegionOfUniforms()[m_BackbufferIndex],
 				&UBO, sizeof(UBO));
 				*/
 		}

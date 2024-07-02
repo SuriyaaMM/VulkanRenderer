@@ -8,7 +8,6 @@ namespace Fox
 			std::vector<const char*>* pRequiredExtensionsV,
 			std::vector<const char*>* pRequiredLayersV)
 			:
-			Manager(),
 			PhysicalDeviceManager::PhysicalDeviceManager(Instance),
 			QueueManager::QueueManager(m_PhysicalDevice, Surface),
 			m_RDeviceExtensions(pRequiredExtensionsV), 

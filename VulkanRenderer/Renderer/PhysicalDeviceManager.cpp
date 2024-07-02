@@ -5,6 +5,14 @@ namespace Fox
 	namespace vk
 	{
 		PhysicalDeviceManager::PhysicalDeviceManager(VkInstance& Instance)
+			:
+			Manager(),
+
+			m_APhysicalDevices(),
+			m_APhysicalDeviceProperties(),
+			m_APhysicalDeviceFeatures(),
+			m_PhysicalDevice(VK_NULL_HANDLE),
+			m_EnabledPhysicalDeviceFeatures()
 		{
 			//Section:: Enumeration of Available Physical Devices
 
@@ -32,6 +40,11 @@ namespace Fox
 			//Temporarily Chosing the First GPU as our Physical Device
 			m_PhysicalDevice = m_APhysicalDevices[0];
 			m_EnabledPhysicalDeviceFeatures = {};
+		}
+
+		void PhysicalDeviceManager::DestroyResources() noexcept
+		{
+
 		}
 	}
 	

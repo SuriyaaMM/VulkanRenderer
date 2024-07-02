@@ -5,9 +5,11 @@ namespace Fox
 {
 	namespace Resource
 	{
-		Frame::Frame(vk::DeviceManager* pDeviceManager, vk::WindowManager* pWindowManager)
+		Frame::Frame(vk::DeviceManager* pDeviceManager, vk::WindowManager* pWindowManager,
+			vk::CommandPoolManager* pCommandPoolManager)
 			: 
 			MResource(pDeviceManager->GetDeviceH()),
+			m_CommandBuffer(pDevice, pCommandPoolManager->GetGraphicsPoolH(), 1),
 			m_RenderFinished(pDevice, VK_SEMAPHORE_TYPE_BINARY),
 			m_ImageAvailable(pDevice, VK_SEMAPHORE_TYPE_BINARY),
 			m_AsyncFence(pDevice, VK_FENCE_CREATE_SIGNALED_BIT)
@@ -15,29 +17,18 @@ namespace Fox
 			
 		}
 
-		void Frame::PresentFrame(Swapchain* pSwapchain, Framebuffer* pFramebuffer, 
-			CommandBuffer* pGraphicsCmdBuffer, VkQueue* pGraphicsQueue)
+		void Frame::PresentFrame(Swapchain* pSwapchain, VkQueue* pGraphicsQueue, uint32_t ImageIndex) 
+			noexcept
 		{
-			vkWaitForFences(*pDevice, 1, m_AsyncFence.GetFenceH(), VK_TRUE, UINT64_MAX);
-
-			uint32_t ImageIndex = 0;
-
-			Debug::Result = vkAcquireNextImageKHR(*pDevice, *pSwapchain->GetSwapchainH(), UINT64_MAX,
-				*m_ImageAvailable.GetSemaphoreH(), VK_NULL_HANDLE, &ImageIndex);
-
-			vkResetFences(*pDevice, 1, m_AsyncFence.GetFenceH());
-
 			VkPipelineStageFlags WaitStages[1] =
 			{ VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-
-			//UpdateUniform(m_BackbufferIndex);
 
 			VkSubmitInfo QueueSubmitI = {};
 			QueueSubmitI.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 			QueueSubmitI.pWaitSemaphores = m_ImageAvailable.GetSemaphoreH();
 			QueueSubmitI.pWaitDstStageMask = WaitStages;
 			QueueSubmitI.commandBufferCount = 1;
-			QueueSubmitI.pCommandBuffers = pGraphicsCmdBuffer->GetCommandBufferH();
+			QueueSubmitI.pCommandBuffers = m_CommandBuffer.GetCommandBufferH();
 			QueueSubmitI.pSignalSemaphores = m_RenderFinished.GetSemaphoreH();
 			QueueSubmitI.signalSemaphoreCount = 1;
 			QueueSubmitI.waitSemaphoreCount = 1;
@@ -61,7 +52,9 @@ namespace Fox
 
 		void Frame::DestroyResource() noexcept
 		{
-			
+			m_AsyncFence.DestroyResource();
+			m_ImageAvailable.DestroyResource();
+			m_RenderFinished.DestroyResource();
 		}
 	}
 }

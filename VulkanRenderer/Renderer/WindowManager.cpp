@@ -4,17 +4,21 @@ namespace Fox
 {
 	namespace vk
 	{
-		WindowManager::WindowManager(uint32_t Width, uint32_t Height,
-			std::string Title, VkInstance* pValidInstance)
+		WindowManager::WindowManager(std::string Title, VkInstance* pValidInstance)
 			:
 			ILManager(pValidInstance),
-			m_Window(VK_NULL_HANDLE), m_Surface(VK_NULL_HANDLE)
+			m_Window(VK_NULL_HANDLE), 
+			m_Surface(VK_NULL_HANDLE)
 		{
 			//Section:: Creation of GLFW Window
 			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-			m_Window = glfwCreateWindow(Width, Height, Title.c_str(), nullptr, nullptr);
+			//Section:: Fetching Monitor Resolution
+			const GLFWvidmode* PrimaryVideoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+			m_Window = glfwCreateWindow(PrimaryVideoMode->width, PrimaryVideoMode->height, Title.c_str(), 
+				nullptr, nullptr);
 
 			if (m_Window == nullptr)
 			{

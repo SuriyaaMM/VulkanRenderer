@@ -41,32 +41,5 @@ namespace Fox
 			VkFence m_Fence;
 		};
 	}
-
-	namespace vk
-	{
-		class SyncManager : public Manager
-		{
-		public:
-
-			SyncManager(const SyncManager& Other) = delete;
-			SyncManager(SyncManager&& Other) = delete;
-
-			SyncManager(DeviceManager* pDeviceManager);
-			~SyncManager() = default;
-
-			void RecreateSyncObjects(DeviceManager* pDeviceManager);
-
-			virtual void DestroyResources() noexcept override;
-
-			Resource::Semaphore* GetImageAvailableSemaphore() noexcept { return m_ImageAvailable.data(); }
-			Resource::Semaphore* GetRenderFinishedSemaphore() noexcept { return m_RenderFinished.data(); }
-			Resource::Fence*	 GetFence()					  noexcept { return m_AsyncFence.data(); }
-
-		private:
-			std::vector<Resource::Semaphore> m_ImageAvailable;
-			std::vector<Resource::Semaphore> m_RenderFinished;
-			std::vector<Resource::Fence> m_AsyncFence;
-		};
-	}
 }
 

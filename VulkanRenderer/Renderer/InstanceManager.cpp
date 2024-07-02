@@ -5,14 +5,14 @@ namespace Fox
 {
 	namespace vk
 	{
-		InstanceManager::InstanceManager(
-			std::vector<const char*>* pRequiredExtensionsV,
+		InstanceManager::InstanceManager(std::vector<const char*>* pRequiredExtensionsV,
 			std::vector<const char*>* pRequiredLayersV)
 			:
 			Manager(),
 			m_RInstanceExtensions(pRequiredExtensionsV), 
 			m_RInstanceLayers(pRequiredLayersV),
-			m_Instance(VK_NULL_HANDLE), m_DebugMessenger(VK_NULL_HANDLE)
+			m_Instance(VK_NULL_HANDLE), 
+			m_DebugMessenger(VK_NULL_HANDLE)
 		{
 			glfwInit();
 

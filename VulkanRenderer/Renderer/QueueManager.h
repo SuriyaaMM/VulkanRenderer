@@ -13,7 +13,7 @@ namespace Fox
 
 	namespace vk
 	{
-		class QueueManager
+		class QueueManager : public Manager
 		{
 		public:
 			QueueManager(const QueueManager& Source) = delete;
@@ -21,6 +21,8 @@ namespace Fox
 
 			QueueManager(VkPhysicalDevice& PhysicalDevice, VkSurfaceKHR& Surface);
 			~QueueManager() = default;
+
+			virtual void DestroyResources() noexcept override;
 
 			void SetQueueFamilyPriority(QUEUE_FAMILY QueueFamily, float Priority) noexcept;
 
@@ -30,14 +32,17 @@ namespace Fox
 					{	m_QueueFamilyIndices[QUEUE_FAMILY_GRAPHICS].value(),
 						m_QueueFamilyIndices[QUEUE_FAMILY_TRANSFER].value() });
 			}
-			uint32_t&	GetQueueFamilyIndex(QUEUE_FAMILY QueueFamily) noexcept
+
+			uint32_t& GetQueueFamilyIndex(QUEUE_FAMILY QueueFamily) noexcept
 			{
 				return m_QueueFamilyIndices[QueueFamily].value();
 			}
-			VkQueue&	GetQueue(QUEUE_FAMILY QueueFamily) noexcept
+
+			VkQueue* GetQueueH(QUEUE_FAMILY QueueFamily) noexcept
 			{
-				return m_QueueHandles[QueueFamily];
+				return &m_QueueHandles[QueueFamily];
 			}
+
 			float&		GetQueueFamilyPriority(QUEUE_FAMILY QueueFamily) noexcept
 			{
 				return m_QueueFamilyPriorities[QueueFamily];
